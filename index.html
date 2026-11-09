@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark h-full w-full overflow-hidden">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DSA High-Frequency Interview Sprint (Java Edition)</title>
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- PrismJS for Java Syntax Highlighting -->
+  
+  <!-- PrismJS Tomorrow Dark Theme for Java Code Highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
@@ -19,24 +22,18 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#eef2ff',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              900: '#1e1b4b',
-            },
             surface: {
-              base: '#090d16',
-              card: '#0f172a',
-              cardHover: '#17223b',
+              base: '#020617',      /* slate-950 */
+              sidebar: '#0b1120',   /* slightly lighter navy */
+              card: '#0f172a',      /* slate-900 */
+              cardHover: '#1e293b', /* slate-800 */
               border: '#1e293b',
               borderLight: '#334155'
             }
           },
           fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-            mono: ['Fira Code', 'JetBrains Mono', 'ui-monospace', 'monospace']
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['Fira Code', 'JetBrains Mono', 'ui-monospace', 'Menlo', 'monospace']
           }
         }
       }
@@ -44,42 +41,42 @@
   </script>
 
   <style>
-    /* Responsive root & iframe compatibility */
-    :root {
-      --header-height: 104px;
-    }
-
+    /* Strict viewport containment: Window never scrolls */
     html, body {
-      min-height: 100%;
-      background-color: #090d16;
-      color: #e2e8f0;
-      overflow-x: hidden;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #020617;
+      color: #f1f5f9;
+      -webkit-font-smoothing: antialiased;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Custom sleek scrollbar for sidebar, modals, & code */
+    /* Isolated scrollbars preventing chained scrolling */
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #090d16;
-      border-radius: 4px;
+      background: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-      border: 1px solid #090d16;
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 9999px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
-    .custom-scrollbar {
-      scrollbar-width: thin;
-      scrollbar-color: #334155 #090d16;
+      background: rgba(148, 163, 184, 0.6);
     }
 
-    /* Hide scrollbar for touch swiping filter pills */
+    /* Hide horizontal scrollbar on touch devices */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -92,9 +89,9 @@
     pre[class*="language-"] {
       margin: 0;
       border-radius: 0.75rem;
-      background: #0b1120 !important;
+      background: #050a15 !important;
       font-size: 0.8rem;
-      line-height: 1.5;
+      line-height: 1.55;
       max-width: 100%;
       overflow-x: auto;
     }
@@ -106,148 +103,147 @@
     code[class*="language-"] {
       font-family: 'Fira Code', monospace !important;
     }
-
-    /* Responsive diagram helper */
-    .diagram-container {
-      width: 100%;
-      overflow-x: auto;
-    }
-    .diagram-container svg {
-      max-width: 100%;
-      height: auto;
-    }
   </style>
 </head>
 
-<body class="flex flex-col min-h-screen font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+<body class="h-full w-full overflow-hidden select-text">
 
-  <!-- UNIFIED STICKY HEADER (Contains both Title bar & Filter row to prevent overlapping) -->
-  <header id="appHeader" class="sticky top-0 z-40 bg-[#090d16]/95 backdrop-blur-md border-b border-surface-border shadow-md">
-    
-    <!-- TOP ROW: Brand, Toggle, Progress & Modal -->
-    <div class="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
+  <!-- ROOT SHELL -->
+  <div id="appRoot" class="h-full w-full flex flex-col overflow-hidden bg-surface-base">
+
+    <!-- FIXED APPLICATION HEADER (Never scrolls) -->
+    <header class="h-14 sm:h-16 flex-none bg-surface-sidebar/95 backdrop-blur-md border-b border-surface-border z-30 px-3 sm:px-6 flex items-center justify-between gap-3 shadow-md">
       
-      <!-- Left: Toggle Drawer + Brand Title -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="sidebarToggleBtn" aria-label="Toggle Problem List" class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-surface-card hover:bg-slate-800 border border-surface-border text-slate-200 hover:text-white transition shadow-sm text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <!-- Brand & Mobile Drawer Trigger -->
+      <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+        <!-- Toggle button: Opens drawer on mobile, collapses sidebar on desktop -->
+        <button id="sidebarToggleBtn" aria-label="Toggle Problem Explorer" 
+                class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-card hover:bg-surface-cardHover border border-surface-border text-slate-200 hover:text-white transition text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm shrink-0">
           <i class="fa-solid fa-bars-staggered text-indigo-400"></i>
           <span class="inline">Problems</span>
-          <span class="px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-300 font-mono text-[10px]">15</span>
+          <span id="headerTotalBadge" class="px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-300 font-mono text-[10px]">15</span>
         </button>
 
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-white flex items-center gap-1.5 sm:gap-2 truncate">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping hidden sm:inline-block shrink-0"></span>
-              <span class="truncate">DSA High-Frequency Interview Sprint</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 truncate">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 hidden sm:inline-block shrink-0"></span>
+            <h1 class="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-white truncate">
+              DSA High-Frequency Interview Sprint
             </h1>
-            <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">Java</span>
+            <span class="hidden md:inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+              Java Edition
+            </span>
           </div>
-          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">15 Core Patterns & Derivations</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block truncate">
+            15 Curated Problems &bull; $O(N^2)$ to $O(N)$ Intuition Bridges
+          </p>
         </div>
       </div>
 
-      <!-- Right: Progress Tracker & Modal Trigger -->
+      <!-- Progress Tracking & Universal Rules -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <!-- Progress Counter -->
-        <div class="flex items-center gap-2 bg-surface-card border border-surface-border px-2.5 sm:px-3 py-1.5 rounded-xl text-xs">
-          <span class="text-[11px] text-slate-400 hidden sm:inline font-medium">Done:</span>
+        <!-- Mastery Progress Meter -->
+        <div class="flex items-center gap-2 bg-surface-card border border-surface-border px-2.5 sm:px-3 py-1.5 rounded-xl text-xs shadow-inner">
+          <span class="text-[11px] text-slate-400 hidden md:inline font-medium">Mastered:</span>
           <span id="masteredCount" class="font-bold text-emerald-400 text-xs">0 / 15</span>
           <div class="w-14 sm:w-20 md:w-24 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-            <div id="globalProgressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-1.5 rounded-full transition-all duration-500 w-0"></div>
+            <div id="globalProgressBar" class="bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 h-1.5 rounded-full transition-all duration-300 w-0"></div>
           </div>
           <span id="masteredPercent" class="text-[10px] font-bold text-slate-300">0%</span>
         </div>
 
-        <!-- Cheat Sheet Trigger Button -->
-        <button id="openCheatSheetBtn" class="flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-600/15 text-indigo-300 hover:bg-indigo-600/25 border border-indigo-500/30 transition">
+        <!-- Universal Derivation Rules Modal Trigger -->
+        <button id="openCheatSheetBtn" class="flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 border border-indigo-500/30 transition">
           <i class="fa-solid fa-lightbulb text-amber-400"></i>
-          <span class="hidden md:inline">Universal</span> <span class="hidden sm:inline">Derivation</span> Rules
+          <span class="hidden sm:inline">Derivation</span> Rules
         </button>
 
         <!-- Reset Button -->
-        <button id="resetProgressBtn" title="Reset mastered progress" class="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-surface-card transition text-xs">
+        <button id="resetProgressBtn" title="Reset all progress" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-surface-card transition text-xs">
           <i class="fa-solid fa-arrow-rotate-left"></i>
         </button>
       </div>
+    </header>
+
+    <!-- WORKSPACE VIEWPORT (Fills remaining height, contains sidebar + content pane) -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+      <!-- SIDEBAR (Desktop: Fixed width docked pane; Mobile: Slide-out drawer) -->
+      <aside id="sidebar" 
+             class="fixed lg:relative inset-y-0 lg:inset-auto left-0 z-50 lg:z-10 w-80 xl:w-[340px] h-full flex flex-col bg-surface-sidebar border-r border-surface-border transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out shadow-2xl lg:shadow-none flex-none">
+        
+        <!-- SIDEBAR TOP SECTION (Fixed Search & Category Filters) -->
+        <div class="flex-none p-3 border-b border-surface-border bg-surface-sidebar/95 space-y-2.5">
+          <!-- Mobile Drawer Title Bar -->
+          <div class="flex items-center justify-between lg:hidden pb-1">
+            <span class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-list-check text-indigo-400"></i>
+              Question Navigator
+            </span>
+            <button id="closeSidebarBtn" aria-label="Close sidebar" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+              <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full">
+            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-[11px]"></i>
+            <input type="text" id="searchInput" placeholder="Filter (e.g. stock, two sum, binary)..." 
+                   class="w-full bg-slate-950/80 border border-surface-border focus:border-indigo-500 text-xs rounded-lg pl-8 pr-7 py-1.5 text-slate-200 placeholder-slate-500 focus:outline-none transition">
+            <button id="clearSearchBtn" class="absolute right-2.5 top-2 text-slate-500 hover:text-slate-300 text-xs hidden">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 text-xs">
+            <button data-day-filter="all" class="day-filter-btn whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition bg-indigo-600 text-white shadow-sm">All (15)</button>
+            <button data-day-filter="1" class="day-filter-btn whitespace-nowrap px-2 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">Day 1 (8)</button>
+            <button data-day-filter="2" class="day-filter-btn whitespace-nowrap px-2 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">Day 2 (5)</button>
+            <button data-day-filter="3" class="day-filter-btn whitespace-nowrap px-2 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">Day 3 (2)</button>
+            <button data-day-filter="mastered" class="day-filter-btn whitespace-nowrap px-2 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">
+              <i class="fa-solid fa-check text-emerald-400 mr-1"></i><span id="masteredPillCount">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SIDEBAR INDEPENDENT SCROLL LIST (overscroll-contain prevents chained window scrolling) -->
+        <nav id="problemList" class="flex-1 overflow-y-auto overscroll-contain custom-scrollbar p-2.5 space-y-1.5 text-xs">
+          <!-- Dynamically populated via JS -->
+        </nav>
+
+        <!-- SIDEBAR FOOTER (Keyboard shortcuts info) -->
+        <div class="flex-none p-2.5 bg-slate-950/90 border-t border-surface-border flex items-center justify-between text-[11px] text-slate-400">
+          <span><kbd class="px-1.5 py-0.5 rounded bg-surface-card border border-surface-border text-slate-300 font-mono">J</kbd>/<kbd class="px-1.5 py-0.5 rounded bg-surface-card border border-surface-border text-slate-300 font-mono">K</kbd> Prev/Next</span>
+          <span><kbd class="px-1.5 py-0.5 rounded bg-surface-card border border-surface-border text-slate-300 font-mono">M</kbd> Toggle Master</span>
+        </div>
+      </aside>
+
+      <!-- MOBILE BACKDROP OVERLAY -->
+      <div id="sidebarOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-200"></div>
+
+      <!-- MAIN CONTENT PANE (Completely isolated independent scroll container) -->
+      <main id="mainScrollContainer" class="flex-1 h-full overflow-y-auto overscroll-contain custom-scrollbar p-3.5 sm:p-6 lg:p-8 bg-surface-base">
+        <div id="problemDetailView" class="max-w-4xl mx-auto space-y-5 sm:space-y-6 pb-12">
+          <!-- Dynamically rendered problem workspace -->
+        </div>
+      </main>
+
     </div>
-
-    <!-- BOTTOM ROW: Category Filter Pills & Search Input -->
-    <div class="border-t border-surface-border/60 bg-[#0b101c]/90 px-3 sm:px-6 py-1.5">
-      <div class="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto flex items-center justify-between gap-2">
-        <!-- Filter Pills with smooth horizontal touch-scroll on mobile -->
-        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 text-xs shrink-0 max-w-[65%] sm:max-w-none">
-          <button data-day-filter="all" class="day-filter-btn whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition bg-indigo-600 text-white shadow-sm">All (15)</button>
-          <button data-day-filter="1" class="day-filter-btn whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">Day 1 (8)</button>
-          <button data-day-filter="2" class="day-filter-btn whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">Day 2 (5)</button>
-          <button data-day-filter="3" class="day-filter-btn whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">Day 3 (2)</button>
-          <button data-day-filter="mastered" class="day-filter-btn whitespace-nowrap px-2.5 py-1 rounded-lg font-medium transition text-slate-400 hover:text-slate-200 bg-surface-card border border-surface-border">
-            <i class="fa-solid fa-check text-emerald-400 mr-1"></i>Mastered (<span id="masteredFilterCount">0</span>)
-          </button>
-        </div>
-
-        <!-- Search Input -->
-        <div class="relative w-36 sm:w-56 shrink-0 text-xs">
-          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-500 text-[11px]"></i>
-          <input type="text" id="searchInput" placeholder="Search patterns..." 
-                 class="w-full bg-[#090d16] border border-surface-border focus:border-indigo-500 text-xs rounded-lg pl-7 pr-3 py-1 text-slate-200 placeholder-slate-500 focus:outline-none transition">
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN APP CONTAINER (Centered on 24"+ screens, responsive 2-column on 13"/14" laptops, drawer on mobile) -->
-  <div class="flex-1 w-full max-w-7xl 2xl:max-w-[1536px] mx-auto flex relative">
-
-    <!-- SIDEBAR DRAWER: Off-canvas on mobile/tablet (< 1024px), Pinned 2-column on laptops & desktops (>= 1024px) -->
-    <aside id="sidebar" class="fixed lg:sticky top-0 lg:top-[var(--header-height,104px)] left-0 z-50 lg:z-10 w-72 sm:w-80 h-full lg:h-[calc(100vh-var(--header-height,104px))] bg-surface-card border-r border-surface-border flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out shadow-2xl lg:shadow-none shrink-0">
-      
-      <!-- Drawer Header on Mobile / Small screens -->
-      <div class="p-3 border-b border-surface-border flex items-center justify-between lg:hidden bg-[#0b1120]">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-layer-group text-indigo-400 text-xs"></i>
-          <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">Curated Sprint Questions</span>
-        </div>
-        <button id="closeSidebarBtn" aria-label="Close sidebar" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
-      </div>
-
-      <!-- Problem List Container with independent scrollbar -->
-      <nav id="problemList" class="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-1.5 text-xs">
-        <!-- Injected via JavaScript -->
-      </nav>
-
-      <!-- Sidebar Footer Shortcuts -->
-      <div class="p-2.5 bg-[#090d16]/95 border-t border-surface-border flex items-center justify-between text-[11px] text-slate-400 shrink-0">
-        <span><kbd class="px-1.5 py-0.5 rounded bg-surface-card border border-surface-border text-slate-300">J</kbd>/<kbd class="px-1.5 py-0.5 rounded bg-surface-card border border-surface-border text-slate-300">K</kbd> Prev/Next</span>
-        <span><kbd class="px-1.5 py-0.5 rounded bg-surface-card border border-surface-border text-slate-300">M</kbd> Master</span>
-      </div>
-    </aside>
-
-    <!-- MOBILE BACKDROP OVERLAY -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden lg:hidden"></div>
-
-    <!-- MAIN CONTENT DETAIL VIEW -->
-    <main class="flex-1 min-w-0 p-3 sm:p-5 md:p-6 lg:p-8">
-      <div id="problemDetailView" class="max-w-4xl mx-auto space-y-5 sm:space-y-6">
-        <!-- Rendered dynamically -->
-      </div>
-    </main>
   </div>
 
-  <!-- PATTERN CHEAT SHEET MODAL -->
-  <div id="cheatSheetModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-6">
+  <!-- PATTERN DERIVATION MODAL -->
+  <div id="cheatSheetModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-6">
     <div class="bg-surface-card border border-surface-border rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
       <!-- Modal Header -->
-      <div class="px-4 sm:px-5 py-3.5 border-b border-surface-border flex items-center justify-between bg-[#0b1120]">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 text-xs shrink-0">
+      <div class="px-4 sm:px-5 py-3.5 border-b border-surface-border flex items-center justify-between bg-surface-sidebar">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 text-sm shrink-0">
             <i class="fa-solid fa-brain"></i>
           </div>
           <div>
-            <h2 class="text-xs sm:text-sm font-bold text-white">The 5 Core Derivation Triggers</h2>
-            <p class="text-[10px] sm:text-[11px] text-slate-400">Transform $O(N^2)$ brute forces into $O(N)$ with this mental framework</p>
+            <h2 class="text-xs sm:text-sm font-bold text-white">The 5 Universal Derivation Triggers</h2>
+            <p class="text-[10px] sm:text-[11px] text-slate-400">Ask this question whenever you write an $O(N^2)$ brute force</p>
           </div>
         </div>
         <button id="closeCheatSheetBtn" aria-label="Close modal" class="text-slate-400 hover:text-white p-1">
@@ -256,64 +252,64 @@
       </div>
 
       <!-- Modal Body -->
-      <div class="p-4 sm:p-5 overflow-y-auto custom-scrollbar space-y-3 text-xs text-slate-300 leading-relaxed">
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+      <div class="p-4 sm:p-5 overflow-y-auto overscroll-contain custom-scrollbar space-y-3 text-xs text-slate-300 leading-relaxed">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
           <div class="flex items-center gap-2 font-bold text-indigo-300 mb-1">
-            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0">1</span>
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0 font-mono">1</span>
             Linear search inside a nested loop &rarr; HashMap / HashSet
           </div>
-          <p class="text-slate-400 pl-7">If your inner loop exists solely to ask: <em>"Have I seen the complement <code>(target - x)</code> or this value before?"</em>, replace the $O(N)$ inner search with an $O(1)$ amortized Hash Table lookup.</p>
+          <p class="text-slate-400 pl-7">If your inner loop is doing a linear scan to check <em>"Have I seen (target - x) before?"</em>, trade space for time with an $O(1)$ amortized Hash Map lookup.</p>
         </div>
 
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
           <div class="flex items-center gap-2 font-bold text-indigo-300 mb-1">
-            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0">2</span>
-            Comparing all past elements against today &rarr; Running Aggregate
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0 font-mono">2</span>
+            Comparing all past days against today &rarr; Running Minimum
           </div>
-          <p class="text-slate-400 pl-7">If you are looking back at every previous day to maximize difference, you do not need every day stored. You only need the single <strong>historic minimum</strong> seen so far.</p>
+          <p class="text-slate-400 pl-7">To maximize profit selling on day <code>j</code>, you don't need to inspect every past day. You only care about the single <strong>historic minimum</strong> seen so far.</p>
         </div>
 
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
           <div class="flex items-center gap-2 font-bold text-indigo-300 mb-1">
-            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0">3</span>
-            Sorted Array + pair / triplet condition &rarr; Two Pointers
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0 font-mono">3</span>
+            Sorted Array + pair/triplet condition &rarr; Two Pointers
           </div>
-          <p class="text-slate-400 pl-7">Sorted elements give directional guarantee: <code>sum = nums[L] + nums[R]</code>. If too small, advance <code>L++</code>. If too large, retreat <code>R--</code>. Discard half the search space without nested loops.</p>
+          <p class="text-slate-400 pl-7">Sorted elements give directional certainty: <code>sum = nums[L] + nums[R]</code>. If sum is too small, advance <code>L++</code>. If too large, retreat <code>R--</code>. Discard half the search space without nested loops.</p>
         </div>
 
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
           <div class="flex items-center gap-2 font-bold text-indigo-300 mb-1">
-            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0">4</span>
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0 font-mono">4</span>
             Contiguous Substring / Subarray constraint &rarr; Sliding Window
           </div>
-          <p class="text-slate-400 pl-7">Instead of generating $O(N^2)$ candidate slices, keep an expandable window <code>[L, R]</code>. Expand <code>R</code> to add state; when a rule breaks, advance <code>L</code> to restore validity.</p>
+          <p class="text-slate-400 pl-7">Instead of generating $O(N^2)$ candidate slices, keep an expandable window <code>[L, R]</code>. Expand <code>R</code> to add state; when duplicate or invalid condition arises, advance <code>L</code> past the collision point.</p>
         </div>
 
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
           <div class="flex items-center gap-2 font-bold text-indigo-300 mb-1">
-            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0">5</span>
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] shrink-0 font-mono">5</span>
             Sorted or Rotated Array in $O(\log N)$ &rarr; Binary Search
           </div>
-          <p class="text-slate-400 pl-7">Compare middle element <code>nums[mid]</code>. In rotated arrays, at least one half is always cleanly sorted. Determine if the target falls within that sorted half, then halve the search space.</p>
+          <p class="text-slate-400 pl-7">At index <code>mid</code>, at least one half of a rotated array is guaranteed to be normally sorted. Determine if the target falls in the sorted half, then halve the search space.</p>
         </div>
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-4 sm:px-5 py-3 bg-[#0b1120] border-t border-surface-border flex justify-end">
+      <div class="px-4 sm:px-5 py-3 bg-surface-sidebar border-t border-surface-border flex justify-end">
         <button id="cheatSheetDoneBtn" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">
-          Got it, back to questions
+          Back to Questions
         </button>
       </div>
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATIONS -->
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- APPLICATION DATA & LOGIC -->
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
     // -------------------------------------------------------------
-    // SAFE STORAGE WRAPPER (Protects against Google Sites iframe storage blocks)
+    // SAFE STORAGE WRAPPER (Guarantees zero-crash in iframe sandboxes)
     // -------------------------------------------------------------
     const SafeStorage = {
       memoryStore: {},
@@ -321,7 +317,6 @@
         try {
           return window.localStorage.getItem(key);
         } catch (e) {
-          console.warn('localStorage read restricted by iframe sandbox; using memory store.');
           return this.memoryStore[key] || null;
         }
       },
@@ -329,17 +324,16 @@
         try {
           window.localStorage.setItem(key, value);
         } catch (e) {
-          console.warn('localStorage write restricted by iframe sandbox; using memory store.');
           this.memoryStore[key] = String(value);
         }
       }
     };
 
     // -------------------------------------------------------------
-    // 15 CURATED SPRINT QUESTIONS DATASET
+    // 15 CURATED SPRINT PROBLEMS
     // -------------------------------------------------------------
     const PROBLEMS = [
-      // ---------------- Day 1 (Arrays, Hashing & Two Pointers) ----------------
+      // Day 1
       {
         id: 1,
         lcNumber: 1,
@@ -347,7 +341,7 @@
         day: 1,
         dayLabel: "Day 1: Arrays & Hashing",
         difficulty: "Easy",
-        pattern: "HashMap Lookup",
+        pattern: "HashMap Complement Lookup",
         problemStatement: "Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to <code>target</code>. You may assume each input has exactly one solution, and you may not use the same element twice.",
         examples: [
           { input: "nums = [2, 7, 11, 15], target = 9", output: "[0, 1]", explanation: "nums[0] + nums[1] == 9, we return [0, 1]." },
@@ -357,33 +351,27 @@
         bottleneck: "The inner loop repeatedly executes an O(N) scan just to answer: 'Does the element (target - nums[i]) exist in the remainder of the array?'",
         aha: "Instead of repeatedly scanning the array, store each visited element and its index in a HashMap (value -> index). You can now check for the complement in O(1) time in a single pass.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">Array: [2, 7, 11, 15] | Target = 9</div>
-            <div class="grid grid-cols-4 gap-2 text-center">
-              <div class="p-2 rounded bg-indigo-950/80 border border-indigo-500/50 text-indigo-300">
-                <span class="text-[10px] text-slate-400">idx 0</span><div class="font-bold text-sm">2</div>
-              </div>
-              <div class="p-2 rounded bg-emerald-950/80 border border-emerald-500/50 text-emerald-300">
-                <span class="text-[10px] text-slate-400">idx 1</span><div class="font-bold text-sm">7</div>
-              </div>
-              <div class="p-2 rounded bg-slate-800/60 border border-slate-700 text-slate-400">
-                <span class="text-[10px] text-slate-500">idx 2</span><div class="font-bold text-sm">11</div>
-              </div>
-              <div class="p-2 rounded bg-slate-800/60 border border-slate-700 text-slate-400">
-                <span class="text-[10px] text-slate-500">idx 3</span><div class="font-bold text-sm">15</div>
-              </div>
-            </div>
-            <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-between">
-              <div>
-                <span class="text-amber-400 font-bold">At index 1 (val=7):</span> Complement = 9 - 7 = <span class="text-emerald-400 font-bold">2</span>
-              </div>
-              <div class="text-right">
-                <span class="text-slate-400">map.containsKey(2) &rarr;</span> <span class="text-indigo-300 font-bold">idx 0</span>
-                <span class="ml-2 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Found [0, 1]</span>
-              </div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">Array: [2, 7, 11, 15] &bull; Target = 9</div>
+  <div class="grid grid-cols-4 gap-2 text-center">
+    <div class="p-2 rounded bg-indigo-950/80 border border-indigo-500/50 text-indigo-300">
+      <span class="text-[10px] text-slate-400 block">idx 0</span><div class="font-bold text-sm">2</div>
+    </div>
+    <div class="p-2 rounded bg-emerald-950/80 border border-emerald-500/50 text-emerald-300">
+      <span class="text-[10px] text-slate-400 block">idx 1</span><div class="font-bold text-sm">7</div>
+    </div>
+    <div class="p-2 rounded bg-slate-900 border border-slate-800 text-slate-500">
+      <span class="text-[10px] block">idx 2</span><div class="font-bold text-sm">11</div>
+    </div>
+    <div class="p-2 rounded bg-slate-900 border border-slate-800 text-slate-500">
+      <span class="text-[10px] block">idx 3</span><div class="font-bold text-sm">15</div>
+    </div>
+  </div>
+  <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800 flex items-center justify-between text-[11px]">
+    <div><span class="text-amber-400 font-bold">At index 1 (val=7):</span> Complement = 9 - 7 = <span class="text-emerald-400 font-bold">2</span></div>
+    <div><span class="text-slate-400">map.containsKey(2) &rarr;</span> <span class="text-indigo-300 font-bold">idx 0</span> <span class="ml-1.5 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Return [0, 1]</span></div>
+  </div>
+</div>`,
         script: {
           clarify: "Can the array have duplicate numbers? Can we use the same index twice? Is a valid solution guaranteed?",
           bruteForce: "The brute force approach uses two nested loops: for each element i, iterate j from i+1 to check if nums[i] + nums[j] == target. This takes O(N^2) time and O(1) space.",
@@ -451,28 +439,27 @@ class Solution {
         bottleneck: "The brute force compares every selling day j against every prior day i to calculate profit.",
         aha: "If you decide to sell on day j, what buying price yields the maximum profit? The historic lowest price before day j! You only need to track one running variable: minPriceSoFar.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">Prices: [7, 1, 5, 3, 6, 4]</div>
-            <div class="relative h-24 border-b border-l border-slate-700 flex items-end justify-between px-3 pb-1">
-              <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">7</span><div class="w-3 bg-slate-700 rounded-t h-16"></div></div>
-              <div class="flex flex-col items-center"><span class="text-[10px] text-emerald-400 font-bold">1</span><div class="w-3 bg-emerald-500 rounded-t h-4 ring-2 ring-emerald-400"></div><span class="text-[9px] text-emerald-300">BUY</span></div>
-              <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">5</span><div class="w-3 bg-slate-700 rounded-t h-12"></div></div>
-              <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">3</span><div class="w-3 bg-slate-700 rounded-t h-8"></div></div>
-              <div class="flex flex-col items-center"><span class="text-[10px] text-indigo-400 font-bold">6</span><div class="w-3 bg-indigo-500 rounded-t h-14 ring-2 ring-indigo-400"></div><span class="text-[9px] text-indigo-300">SELL</span></div>
-              <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">4</span><div class="w-3 bg-slate-700 rounded-t h-10"></div></div>
-            </div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between text-[11px]">
-              <span class="text-emerald-400">minPrice = 1 (Day 2)</span>
-              <span class="text-indigo-400">maxPrice = 6 (Day 5)</span>
-              <span class="font-bold text-white px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Max Profit = 6 - 1 = 5</span>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">Prices: [7, 1, 5, 3, 6, 4]</div>
+  <div class="relative h-24 border-b border-l border-slate-700 flex items-end justify-between px-3 pb-1">
+    <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">7</span><div class="w-3 bg-slate-700 rounded-t h-16"></div></div>
+    <div class="flex flex-col items-center"><span class="text-[10px] text-emerald-400 font-bold">1</span><div class="w-3 bg-emerald-500 rounded-t h-4 ring-2 ring-emerald-400"></div><span class="text-[9px] text-emerald-300">BUY</span></div>
+    <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">5</span><div class="w-3 bg-slate-700 rounded-t h-12"></div></div>
+    <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">3</span><div class="w-3 bg-slate-700 rounded-t h-8"></div></div>
+    <div class="flex flex-col items-center"><span class="text-[10px] text-indigo-400 font-bold">6</span><div class="w-3 bg-indigo-500 rounded-t h-14 ring-2 ring-indigo-400"></div><span class="text-[9px] text-indigo-300">SELL</span></div>
+    <div class="flex flex-col items-center"><span class="text-[10px] text-slate-500">4</span><div class="w-3 bg-slate-700 rounded-t h-10"></div></div>
+  </div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between text-[11px]">
+    <span class="text-emerald-400">minPrice = 1 (Day 2)</span>
+    <span class="text-indigo-400">maxPrice = 6 (Day 5)</span>
+    <span class="font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Max Profit = 6 - 1 = 5</span>
+  </div>
+</div>`,
         script: {
           clarify: "Can we sell on the same day we buy? No. Can we short-sell? No. If prices strictly decrease, should we return 0? Yes.",
           bruteForce: "Check every pair (i, j) where j > i and compute prices[j] - prices[i]. Keep track of the highest difference. Runs in O(N^2) time and O(1) space.",
           bottleneck: "For any day j we evaluate as a selling point, we don't care about all previous days individually; we only care about the absolute lowest price seen up to day j.",
-          optimal: "Maintain `minPrice = Integer.MAX_VALUE` and `maxProfit = 0`. Iterate through prices: update `minPrice = Math.min(minPrice, price)` and `maxProfit = Math.max(maxProfit, price - minPrice)`.",
+          optimal: "Maintain minPrice = Integer.MAX_VALUE and maxProfit = 0. Iterate through prices: update minPrice = Math.min(minPrice, price) and maxProfit = Math.max(maxProfit, price - minPrice).",
           dryRun: "Prices [7, 1, 5, 3, 6, 4]: At 7: min=7. At 1: min=1. At 5: profit=4, max=4. At 3: profit=2. At 6: profit=5, max=5. At 4: profit=3. Final answer is 5."
         },
         bruteForceCode: `class Solution {
@@ -530,23 +517,22 @@ class Solution {
         ],
         constraints: ["1 <= nums.length <= 10^5", "-10^9 <= nums[i] <= 10^9"],
         bottleneck: "The brute force checks every pair of elements in quadratic time O(N^2).",
-        aha: "In Java, `HashSet.add(x)` returns `false` if the item already exists in the set. Stream elements into a set and return true the instant `!set.add(num)` occurs.",
+        aha: "In Java, HashSet.add(x) returns false if the item already exists in the set. Stream elements into a set and return true the instant !set.add(num) occurs.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">Input: [1, 2, 3, 1]</div>
-            <div class="flex flex-wrap gap-2 pt-1">
-              <span class="p-2 rounded bg-slate-800 border border-slate-700">add(1) &rarr; true</span>
-              <span class="p-2 rounded bg-slate-800 border border-slate-700">add(2) &rarr; true</span>
-              <span class="p-2 rounded bg-slate-800 border border-slate-700">add(3) &rarr; true</span>
-              <span class="p-2 rounded bg-rose-950 border border-rose-500/50 text-rose-300 font-bold">add(1) &rarr; FALSE (Duplicate!)</span>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">Input: [1, 2, 3, 1]</div>
+  <div class="flex flex-wrap gap-2 pt-1">
+    <span class="p-2 rounded bg-slate-900 border border-slate-800">add(1) &rarr; true</span>
+    <span class="p-2 rounded bg-slate-900 border border-slate-800">add(2) &rarr; true</span>
+    <span class="p-2 rounded bg-slate-900 border border-slate-800">add(3) &rarr; true</span>
+    <span class="p-2 rounded bg-rose-950/80 border border-rose-500/50 text-rose-300 font-bold">add(1) &rarr; FALSE (Duplicate!)</span>
+  </div>
+</div>`,
         script: {
           clarify: "Should we return true if any number repeats even once? Yes.",
           bruteForce: "Two nested loops comparing nums[i] == nums[j] (O(N^2)), or sort first in O(N log N) and check neighbors.",
           bottleneck: "Linear scans inside nested loops re-examine seen values. A Hash Set provides O(1) membership checking.",
-          optimal: "Create a `HashSet<Integer>`. For each number, if `!seen.add(num)` return true. If loop finishes, return false.",
+          optimal: "Create a HashSet<Integer>. For each number, if !seen.add(num) return true. If loop finishes, return false.",
           dryRun: "With [1, 2, 3, 1]: 1 inserted. 2 inserted. 3 inserted. Second 1 returns false from add(). Immediately return true."
         },
         bruteForceCode: `class Solution {
@@ -597,22 +583,21 @@ class Solution {
         ],
         constraints: ["1 <= s.length, t.length <= 5 * 10^4", "s and t consist of lowercase English letters."],
         bottleneck: "Sorting both strings takes O(N log N). Pairing matching characters manually is O(N^2).",
-        aha: "Lowercase English alphabet has a fixed bound of 26 letters. A single `int[26]` array tracks character balance: increment for `s`, decrement for `t`. If all slots end at 0, they are anagrams.",
+        aha: "Lowercase English alphabet has a fixed bound of 26 letters. A single int[26] array tracks character balance: increment for s, decrement for t. If all slots end at 0, they are anagrams.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">s = "anagram", t = "nagaram"</div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between text-[11px]">
-              <div>'a': +3 from s, -3 from t &rarr; <span class="text-emerald-400 font-bold">0</span></div>
-              <div>'n': +1 from s, -1 from t &rarr; <span class="text-emerald-400 font-bold">0</span></div>
-              <div>All 26 buckets = <span class="text-emerald-400 font-bold">0</span> &rarr; Valid!</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">s = "anagram", t = "nagaram"</div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between text-[11px]">
+    <div>'a': +3 from s, -3 from t &rarr; <span class="text-emerald-400 font-bold">0</span></div>
+    <div>'n': +1 from s, -1 from t &rarr; <span class="text-emerald-400 font-bold">0</span></div>
+    <div>All 26 buckets = <span class="text-emerald-400 font-bold">0</span> &rarr; Valid!</div>
+  </div>
+</div>`,
         script: {
           clarify: "Are characters strictly lowercase English letters? If Unicode is supported, we would use a HashMap<Character, Integer>.",
           bruteForce: "Sort both strings with Arrays.sort() and check Arrays.equals(). Time: O(N log N), Space: O(N).",
           bottleneck: "Sorting modifies order when all we care about is character occurrence counts.",
-          optimal: "Check if lengths differ first. If not, allocate `int[] count = new int[26]`. In one pass, do `count[s.charAt(i) - 'a']++` and `count[t.charAt(i) - 'a']--`. Verify all counts are 0.",
+          optimal: "Check if lengths differ first. If not, allocate int[] count = new int[26]. In one pass, do count[s.charAt(i) - 'a']++ and count[t.charAt(i) - 'a']--. Verify all counts are 0.",
           dryRun: "Both length 7. Characters match frequency perfectly. Count array remains all 0s. Return true."
         },
         bruteForceCode: `import java.util.Arrays;
@@ -668,31 +653,30 @@ class Solution {
         ],
         constraints: ["1 <= strs.length <= 10^4", "0 <= strs[i].length <= 100", "strs[i] consists of lowercase English letters."],
         bottleneck: "Comparing every word against every previously discovered group takes O(N^2 * K).",
-        aha: "All anagrams share the exact same sorted signature. Sort each string's characters to create a canonical string key, and group words in a `HashMap<String, List<String>>`.",
+        aha: "All anagrams share the exact same sorted signature. Sort each string's characters to create a canonical string key, and group words in a HashMap<String, List<String>>.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">["eat", "tea", "tan", "ate", "nat", "bat"]</div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div class="p-2 rounded bg-indigo-950/70 border border-indigo-500/40">
-                <span class="text-[10px] text-indigo-400 font-bold">Key "aet"</span>
-                <div class="text-slate-300">["eat", "tea", "ate"]</div>
-              </div>
-              <div class="p-2 rounded bg-cyan-950/70 border border-cyan-500/40">
-                <span class="text-[10px] text-cyan-400 font-bold">Key "ant"</span>
-                <div class="text-slate-300">["tan", "nat"]</div>
-              </div>
-              <div class="p-2 rounded bg-amber-950/70 border border-amber-500/40">
-                <span class="text-[10px] text-amber-400 font-bold">Key "abt"</span>
-                <div class="text-slate-300">["bat"]</div>
-              </div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">["eat", "tea", "tan", "ate", "nat", "bat"]</div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+    <div class="p-2 rounded bg-indigo-950/70 border border-indigo-500/40">
+      <span class="text-[10px] text-indigo-400 font-bold block">Key "aet"</span>
+      <div class="text-slate-300 truncate">["eat", "tea", "ate"]</div>
+    </div>
+    <div class="p-2 rounded bg-cyan-950/70 border border-cyan-500/40">
+      <span class="text-[10px] text-cyan-400 font-bold block">Key "ant"</span>
+      <div class="text-slate-300 truncate">["tan", "nat"]</div>
+    </div>
+    <div class="p-2 rounded bg-amber-950/70 border border-amber-500/40">
+      <span class="text-[10px] text-amber-400 font-bold block">Key "abt"</span>
+      <div class="text-slate-300 truncate">["bat"]</div>
+    </div>
+  </div>
+</div>`,
         script: {
           clarify: "Can input have empty strings? Yes. Are letters exclusively lowercase English? Yes.",
           bruteForce: "Iterate words: for each word, compare with existing groups one by one to find an anagram match. O(N^2 * K log K).",
           bottleneck: "Group-by-group comparison is redundant when every anagram generates the exact same sorted representation.",
-          optimal: "Use a `Map<String, List<String>>`. For each string: sort its char array to form a key, insert into map via `computeIfAbsent`. Return `new ArrayList<>(map.values())`.",
+          optimal: "Use a Map<String, List<String>>. For each string: sort its char array to form a key, insert into map via computeIfAbsent. Return new ArrayList<>(map.values()).",
           dryRun: "'eat' -> sorted 'aet' -> map.put('aet', ['eat']). 'tea' -> sorted 'aet' -> appends 'tea'. 'tan' -> key 'ant'. Output map values."
         },
         bruteForceCode: `import java.util.*;
@@ -772,23 +756,22 @@ class Solution {
         ],
         constraints: ["1 <= nums.length <= 10^5", "-10^4 <= nums[i] <= 10^4"],
         bottleneck: "Brute force checks all pairs (i, j) to compute subarray sums in O(N^2).",
-        aha: "A running sum that becomes negative will only drag down any future subarray. When `currentSum < 0`, drop it and reset to 0 (or choose `Math.max(num, currentSum + num)`).",
+        aha: "A running sum that becomes negative will only drag down any future subarray. When currentSum < 0, drop it and reset to 0 (or choose Math.max(num, currentSum + num)).",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">[-2, 1, -3, 4, -1, 2, 1, -5, 4]</div>
-            <div class="p-3 bg-slate-950 rounded space-y-1 text-[11px]">
-              <div>num=-2 &rarr; currentSum = -2 &rarr; reset to 0</div>
-              <div>num=1 &rarr; currentSum = 1, max = 1</div>
-              <div>num=-3 &rarr; currentSum = -2 &rarr; reset to 0</div>
-              <div class="text-emerald-400 font-bold">Subarray [4, -1, 2, 1] &rarr; currentSum climbs to 6 (Peak Max!)</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">[-2, 1, -3, 4, -1, 2, 1, -5, 4]</div>
+  <div class="p-3 bg-slate-900 rounded space-y-1 text-[11px]">
+    <div>num=-2 &rarr; currentSum = -2 &rarr; reset to 0</div>
+    <div>num=1 &rarr; currentSum = 1, max = 1</div>
+    <div>num=-3 &rarr; currentSum = -2 &rarr; reset to 0</div>
+    <div class="text-emerald-400 font-bold">Subarray [4, -1, 2, 1] &rarr; currentSum climbs to 6 (Peak Max!)</div>
+  </div>
+</div>`,
         script: {
           clarify: "Must the subarray contain at least one element? Yes. Can numbers be all negative? Yes.",
           bruteForce: "Compute sum of all subarrays from i to j using nested loops. Time: O(N^2), Space: O(1).",
           bottleneck: "A negative prefix cannot contribute positively to any following subarray.",
-          optimal: "Kadane's Algorithm: Maintain `maxSum = nums[0]` and `currentSum = 0`. For each num: `currentSum = Math.max(num, currentSum + num)`, `maxSum = Math.max(maxSum, currentSum)`.",
+          optimal: "Kadane's Algorithm: Maintain maxSum = nums[0] and currentSum = 0. For each num: currentSum = Math.max(num, currentSum + num), maxSum = Math.max(maxSum, currentSum).",
           dryRun: "With [-2, 1]: At -2, curr=-2, max=-2. At 1, curr=max(1, -2+1)=1, max=1. Return 1."
         },
         bruteForceCode: `class Solution {
@@ -814,7 +797,6 @@ class Solution {
         int currentSum = 0;
 
         for (int num : nums) {
-            // Take current num standalone, or extend current running sum
             currentSum = Math.max(num, currentSum + num);
             maxSum = Math.max(maxSum, currentSum);
         }
@@ -842,29 +824,28 @@ class Solution {
         ],
         constraints: ["2 <= numbers.length <= 3 * 10^4", "-1000 <= numbers[i] <= 1000", "numbers is sorted in non-decreasing order.", "Exactly one solution exists."],
         bottleneck: "Using a HashMap takes O(N) memory, completely ignoring the sorted order property.",
-        aha: "Because the array is sorted, `sum = numbers[left] + numbers[right]`. If `sum < target`, incrementing `left` is the only way to increase sum. If `sum > target`, decrementing `right` is the only way to decrease sum.",
+        aha: "Because the array is sorted, sum = numbers[left] + numbers[right]. If sum < target, incrementing left is the only way to increase sum. If sum > target, decrementing right is the only way to decrease sum.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">Sorted: [2, 7, 11, 15] | Target = 9</div>
-            <div class="flex items-center justify-between text-center px-4">
-              <div class="p-2 rounded bg-indigo-900/60 border border-indigo-500/50">
-                <span class="text-indigo-300 font-bold">&uarr; LEFT (2)</span>
-              </div>
-              <div class="text-slate-400 text-[11px]">2 + 15 = 17 > 9 &rarr; right--</div>
-              <div class="p-2 rounded bg-cyan-900/60 border border-cyan-500/50">
-                <span class="text-cyan-300 font-bold">&uarr; RIGHT (15)</span>
-              </div>
-            </div>
-            <div class="p-2 bg-slate-950 rounded text-center text-emerald-400 font-bold">
-              Next: 2 + 7 = 9 == Target! Return 1-based indices [1, 2]
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">Sorted: [2, 7, 11, 15] &bull; Target = 9</div>
+  <div class="flex items-center justify-between text-center px-4">
+    <div class="p-2 rounded bg-indigo-900/60 border border-indigo-500/50">
+      <span class="text-indigo-300 font-bold">&uarr; LEFT (2)</span>
+    </div>
+    <div class="text-slate-400 text-[11px]">2 + 15 = 17 > 9 &rarr; right--</div>
+    <div class="p-2 rounded bg-cyan-900/60 border border-cyan-500/50">
+      <span class="text-cyan-300 font-bold">&uarr; RIGHT (15)</span>
+    </div>
+  </div>
+  <div class="p-2 bg-slate-900 rounded text-center text-emerald-400 font-bold">
+    Next: 2 + 7 = 9 == Target! Return 1-based indices [1, 2]
+  </div>
+</div>`,
         script: {
           clarify: "Are indices 1-based? Yes. Can we modify the array? No need.",
           bruteForce: "Nested loops O(N^2), or HashMap O(N) time and O(N) space.",
           bottleneck: "HashMap takes extra memory and ignores the sorted structure.",
-          optimal: "Start `left = 0`, `right = n - 1`. While `left < right`: sum = numbers[left] + numbers[right]. If sum == target return [left + 1, right + 1]. If sum < target, left++; else right--.",
+          optimal: "Start left = 0, right = n - 1. While left < right: sum = numbers[left] + numbers[right]. If sum == target return [left + 1, right + 1]. If sum < target, left++; else right--.",
           dryRun: "numbers=[2, 7, 11, 15], target=9: left=0(2), right=3(15) -> sum=17 > 9 -> right=2(11). sum=13 > 9 -> right=1(7). sum=9 == target -> return [1, 2]."
         },
         bruteForceCode: `class Solution {
@@ -925,22 +906,21 @@ class Solution {
         ],
         constraints: ["3 <= nums.length <= 3000", "-10^5 <= nums[i] <= 10^5"],
         bottleneck: "Three nested loops yield O(N^3), and deduplicating triplets with a Set adds major overhead.",
-        aha: "Sort array upfront in O(N log N). Fix the first element `nums[i]`, and run Two Pointers (Two Sum II) for the remaining elements to find sum `-nums[i]`. Skip duplicate adjacent elements on the fly to avoid duplicate triplets without a Set.",
+        aha: "Sort array upfront in O(N log N). Fix the first element nums[i], and run Two Pointers (Two Sum II) for the remaining elements to find sum -nums[i]. Skip duplicate adjacent elements on the fly to avoid duplicate triplets without a Set.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">Sorted: [-4, -1, -1, 0, 1, 2]</div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between">
-              <span class="text-amber-400">Fixed i = -1</span>
-              <span class="text-indigo-400">Left = -1, Right = 2</span>
-              <span class="text-emerald-400 font-bold">Sum = 0 &rarr; Record [-1, -1, 2]</span>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">Sorted: [-4, -1, -1, 0, 1, 2]</div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between">
+    <span class="text-amber-400">Fixed i = -1</span>
+    <span class="text-indigo-400">Left = -1, Right = 2</span>
+    <span class="text-emerald-400 font-bold">Sum = 0 &rarr; Record [-1, -1, 2]</span>
+  </div>
+</div>`,
         script: {
           clarify: "Can the triplets be in any order? Yes. Can the answer contain duplicate triplets? No, must be unique.",
           bruteForce: "Three nested loops to test every triplet, sort each triplet, and add to a Set. Time: O(N^3), Space: O(N).",
           bottleneck: "Sorting upfront allows us to reduce 3Sum to N runs of Two Sum II while naturally skipping duplicate values.",
-          optimal: "Sort nums. Loop i from 0 to n-3. If `i > 0 && nums[i] == nums[i-1]`, skip. Set `left = i + 1`, `right = n - 1`. While `left < right`: if sum == 0, record triplet, advance pointers skipping duplicates. If sum < 0, left++; else right--.",
+          optimal: "Sort nums. Loop i from 0 to n-3. If i > 0 && nums[i] == nums[i-1], skip. Set left = i + 1, right = n - 1. While left < right: if sum == 0, record triplet, advance pointers skipping duplicates. If sum < 0, left++; else right--.",
           dryRun: "[-4, -1, -1, 0, 1, 2]: At i=1 (val=-1), left=2(-1), right=5(2). sum=0 -> add [-1, -1, 2]. Skip duplicates, left moves to 3(0), right moves to 4(1). sum=0 -> add [-1, 0, 1]."
         },
         bruteForceCode: `import java.util.*;
@@ -1006,7 +986,7 @@ class Solution {
         edgeCases: ["Fewer than 3 elements returns empty list", "All zeros [0, 0, 0, 0] produces [[0, 0, 0]] exactly once", "No triplets possible"]
       },
 
-      // ---------------- Day 2 (Sliding Window, Intervals & Linked Lists) ----------------
+      // Day 2
       {
         id: 9,
         lcNumber: 3,
@@ -1022,22 +1002,21 @@ class Solution {
         ],
         constraints: ["0 <= s.length <= 5 * 10^4", "s consists of English letters, digits, symbols and spaces."],
         bottleneck: "Brute force checks every substring from index i to j with a Set for duplicates, resulting in O(N^2) or O(N^3).",
-        aha: "Instead of restarting from `left + 1` whenever a duplicate char c is encountered, jump `left` directly past the previous occurrence of c: `left = Math.max(left, lastSeen.get(c) + 1)`.",
+        aha: "Instead of restarting from left + 1 whenever a duplicate char c is encountered, jump left directly past the previous occurrence of c: left = Math.max(left, lastSeen.get(c) + 1).",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">s = "abcabcbb"</div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between text-[11px]">
-              <div>Window [0..2]: "abc" (len 3)</div>
-              <div class="text-amber-400">At idx 3 ('a'): duplicate 'a' seen at 0!</div>
-              <div class="text-emerald-400 font-bold">Jump left to 0 + 1 = 1</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">s = "abcabcbb"</div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between text-[11px]">
+    <div>Window [0..2]: "abc" (len 3)</div>
+    <div class="text-amber-400">At idx 3 ('a'): duplicate 'a' seen at 0!</div>
+    <div class="text-emerald-400 font-bold">Jump left to 0 + 1 = 1</div>
+  </div>
+</div>`,
         script: {
           clarify: "Can string contain symbols/spaces? Yes. Can it be empty? Yes, return 0.",
           bruteForce: "Generate all substrings with two nested loops and check character uniqueness with a Set. Time: O(N^2), Space: O(min(N, M)).",
           bottleneck: "Shrinking by 1 and re-evaluating the entire substring is unnecessary. We know the exact conflicting index.",
-          optimal: "Use a sliding window with a HashMap recording character -> last index. As `right` advances, if character was seen at or after `left`, update `left = map.get(c) + 1`. Record `maxLen = Math.max(maxLen, right - left + 1)`.",
+          optimal: "Use a sliding window with a HashMap recording character -> last index. As right advances, if character was seen at or after left, update left = map.get(c) + 1. Record maxLen = Math.max(maxLen, right - left + 1).",
           dryRun: "For 'abcabcbb': expand right=0,1,2 -> maxLen=3. At right=3 ('a'), 'a' was at 0, move left to 1. Window is now 'bca' (len 3)."
         },
         bruteForceCode: `import java.util.HashSet;
@@ -1060,7 +1039,8 @@ class Solution {
         return maxLen;
     }
 }`,
-        optimalCode: `import java.util.HashMap;
+        optimalCode: 
+`import java.util.HashMap;
 import java.util.Map;
 
 class Solution {
@@ -1100,28 +1080,27 @@ class Solution {
         dayLabel: "Day 2: Sliding Window & Linked Lists",
         difficulty: "Medium",
         pattern: "Two Pointers (Greedy Bottleneck)",
-        problemStatement: "You are given an integer array <code>height</code> of length <code>n</code>. Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store.",
+        problemStatement: "Given an integer array <code>height</code> of length <code>n</code>. Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store.",
         examples: [
           { input: "height = [1,8,6,2,5,4,8,3,7]", output: "49", explanation: "Max area is between index 1 (height 8) and index 8 (height 7): min(8, 7) * (8 - 1) = 49." }
         ],
         constraints: ["n == height.length", "2 <= n <= 10^5", "0 <= height[i] <= 10^4"],
         bottleneck: "Brute force checks every possible pair (i, j) in O(N^2).",
-        aha: "Area is bottlenecked by the shorter wall: `Area = min(h[L], h[R]) * (R - L)`. If you move the taller wall inward, width decreases and height cannot exceed the shorter wall! Therefore, moving the taller wall is always strictly worse. You must ALWAYS move the shorter wall inward.",
+        aha: "Area is bottlenecked by the shorter wall: Area = min(h[L], h[R]) * (R - L). If you move the taller wall inward, width decreases and height cannot exceed the shorter wall! Therefore, moving the taller wall is always strictly worse. You must ALWAYS move the shorter wall inward.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">height = [1, 8, 6, 2, 5, 4, 8, 3, 7]</div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between text-[11px]">
-              <div>Left = 1 (shorter)</div>
-              <div>Right = 7 (taller)</div>
-              <div class="text-emerald-400 font-bold">Must increment Left++!</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">height = [1, 8, 6, 2, 5, 4, 8, 3, 7]</div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between text-[11px]">
+    <div>Left = 1 (shorter)</div>
+    <div>Right = 7 (taller)</div>
+    <div class="text-emerald-400 font-bold">Must increment Left++!</div>
+  </div>
+</div>`,
         script: {
           clarify: "Can the container slant? No. Can lines have height 0? Yes.",
           bruteForce: "Nested loops checking every pair (i, j) with area = min(height[i], height[j]) * (j - i). Time: O(N^2), Space: O(1).",
           bottleneck: "Moving the taller pointer cannot yield a larger area because the width shrinks and the bottleneck remains.",
-          optimal: "Place pointers at extremes: `left = 0`, `right = n - 1`. While `left < right`: calculate area and update `maxArea`. Then if `height[left] < height[right]`, `left++`; else `right--`.",
+          optimal: "Place pointers at extremes: left = 0, right = n - 1. While left < right: calculate area and update maxArea. Then if height[left] < height[right], left++; else right--.",
           dryRun: "left=0 (h=1), right=8 (h=7), width=8, area=8. Since h[left] < h[right], left advances to 1 (h=8). New width=7, area=7*7=49. Max becomes 49."
         },
         bruteForceCode: `class Solution {
@@ -1182,20 +1161,19 @@ class Solution {
         ],
         constraints: ["1 <= intervals.length <= 10^4", "intervals[i].length == 2", "0 <= starti <= endi <= 10^4"],
         bottleneck: "Without sorting, any interval could overlap with any other interval across the entire array.",
-        aha: "Sort intervals by start time. Once sorted, an overlap between interval A and B ONLY exists if `B.start <= A.end`. If overlapping, merge by setting `A.end = Math.max(A.end, B.end)`. If not, start a new interval.",
+        aha: "Sort intervals by start time. Once sorted, an overlap between interval A and B ONLY exists if B.start <= A.end. If overlapping, merge by setting A.end = Math.max(A.end, B.end). If not, start a new interval.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">[[1, 3], [2, 6], [8, 10], [15, 18]]</div>
-            <div class="p-2.5 bg-slate-950 rounded text-emerald-400 text-[11px]">
-              Compare [1, 3] and [2, 6]: Since 2 &le; 3 &rarr; Merge into <span class="font-bold">[1, max(3, 6)] = [1, 6]</span>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">[[1, 3], [2, 6], [8, 10], [15, 18]]</div>
+  <div class="p-2.5 bg-slate-900 rounded text-emerald-400 text-[11px]">
+    Compare [1, 3] and [2, 6]: Since 2 &le; 3 &rarr; Merge into <span class="font-bold">[1, max(3, 6)] = [1, 6]</span>
+  </div>
+</div>`,
         script: {
           clarify: "Are intervals pre-sorted? No. Does touching at the boundary like [1,4] and [4,5] count as overlap? Yes.",
           bruteForce: "Iterative merging by comparing every pair of intervals repeatedly until no more merges occur. Time: O(N^2), Space: O(N).",
           bottleneck: "Unsorted order forces pairwise global scans. Sorting by start time restricts overlap checks to adjacent neighbors.",
-          optimal: "Sort by `a[0]`. Add first interval to merged list. Iterate: if `curr[0] <= last[1]`, merge `last[1] = Math.max(last[1], curr[1])`. Otherwise add `curr` to list.",
+          optimal: "Sort by a[0]. Add first interval to merged list. Iterate: if curr[0] <= last[1], merge last[1] = Math.max(last[1], curr[1]). Otherwise add curr to list.",
           dryRun: "Sorted: [[1,3],[2,6],[8,10]]. Add [1,3]. Next [2,6]: 2 <= 3 -> [1,6]. Next [8,10]: 8 > 6 -> append [8,10]. Return [[1,6],[8,10]]."
         },
         bruteForceCode: `import java.util.*;
@@ -1272,22 +1250,21 @@ class Solution {
         ],
         constraints: ["The number of nodes in the list is the range [0, 5000].", "-5000 <= Node.val <= 5000"],
         bottleneck: "Using an auxiliary stack or array uses O(N) space and requires two passes.",
-        aha: "Use three pointers: `prev = null`, `curr = head`, and `nextTemp`. Store `curr.next`, re-point `curr.next = prev`, shift `prev = curr`, and advance `curr = nextTemp`.",
+        aha: "Use three pointers: prev = null, curr = head, and nextTemp. Store curr.next, re-point curr.next = prev, shift prev = curr, and advance curr = nextTemp.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">Pointers: prev &larr; curr &rarr; nextTemp</div>
-            <div class="p-2.5 bg-slate-950 rounded text-emerald-400 text-[11px]">
-              Step 1: nextTemp = curr.next<br>
-              Step 2: curr.next = prev (invert pointer)<br>
-              Step 3: prev = curr, curr = nextTemp
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">Pointers: prev &larr; curr &rarr; nextTemp</div>
+  <div class="p-2.5 bg-slate-900 rounded text-emerald-400 text-[11px]">
+    Step 1: nextTemp = curr.next<br>
+    Step 2: curr.next = prev (invert pointer)<br>
+    Step 3: prev = curr, curr = nextTemp
+  </div>
+</div>`,
         script: {
           clarify: "Can the head be null? Yes. Should it be done iteratively or recursively? Prefer iterative for O(1) space.",
           bruteForce: "Push node values onto a Stack, then iterate a second time writing values back. Time: O(N), Space: O(N).",
           bottleneck: "Allocating extra memory is unnecessary because list links can be re-pointed in-place.",
-          optimal: "Initialize `ListNode prev = null`, `ListNode curr = head`. While `curr != null`: save `nextTemp = curr.next`, set `curr.next = prev`, set `prev = curr`, set `curr = nextTemp`. Return `prev`.",
+          optimal: "Initialize ListNode prev = null, ListNode curr = head. While curr != null: save nextTemp = curr.next, set curr.next = prev, set prev = curr, set curr = nextTemp. Return prev.",
           dryRun: "1 -> 2 -> null: At 1: nextTemp=2, 1.next=null, prev=1, curr=2. At 2: nextTemp=null, 2.next=1, prev=2, curr=null. Return prev (2)."
         },
         bruteForceCode: `import java.util.Stack;
@@ -1355,23 +1332,22 @@ class Solution {
           { input: "head = [1], pos = -1", output: "false", explanation: "No cycle." }
         ],
         constraints: ["The number of the nodes in the list is in the range [0, 10^4].", "-10^5 <= Node.val <= 10^5"],
-        bottleneck: "Using a `HashSet<ListNode>` consumes O(N) auxiliary memory.",
-        aha: "Floyd's Tortoise and Hare algorithm: `slow` advances 1 step, `fast` advances 2 steps. In a cycle of length C, `fast` closes the gap by 1 node per iteration, guaranteeing a collision without extra memory.",
+        bottleneck: "Using a HashSet<ListNode> consumes O(N) auxiliary memory.",
+        aha: "Floyd's Tortoise and Hare algorithm: slow advances 1 step, fast advances 2 steps. In a cycle of length C, fast closes the gap by 1 node per iteration, guaranteeing a collision without extra memory.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">3 &rarr; [2 &rarr; 0 &rarr; -4] (loops back to 2)</div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between text-[11px]">
-              <div>Slow moves 1 step</div>
-              <div>Fast moves 2 steps</div>
-              <div class="text-emerald-400 font-bold">Guaranteed collision inside cycle!</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">3 &rarr; [2 &rarr; 0 &rarr; -4] (loops back to 2)</div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between text-[11px]">
+    <div>Slow moves 1 step</div>
+    <div>Fast moves 2 steps</div>
+    <div class="text-emerald-400 font-bold">Guaranteed collision inside cycle!</div>
+  </div>
+</div>`,
         script: {
           clarify: "Can node values repeat? Yes, so we compare node references, not values. Can head be null? Yes.",
-          bruteForce: "Traverse list adding each node reference to a `HashSet<ListNode>`. If set already contains node, return true. Time: O(N), Space: O(N).",
+          bruteForce: "Traverse list adding each node reference to a HashSet<ListNode>. If set already contains node, return true. Time: O(N), Space: O(N).",
           bottleneck: "The Set allocates heap objects. Two pointers moving at different speeds inside a cycle must meet.",
-          optimal: "Initialize `slow = head`, `fast = head`. While `fast != null && fast.next != null`: `slow = slow.next`, `fast = fast.next.next`. If `slow == fast` return true. If loop exits, return false.",
+          optimal: "Initialize slow = head, fast = head. While fast != null && fast.next != null: slow = slow.next, fast = fast.next.next. If slow == fast return true. If loop exits, return false.",
           dryRun: "If list has cycle: distance between fast and slow decreases by 1 each step. They will meet within at most one full cycle traversal."
         },
         bruteForceCode: `import java.util.HashSet;
@@ -1417,7 +1393,7 @@ class Solution {
         edgeCases: ["Empty list (head == null) returns false", "Single node pointing to null returns false", "Single node pointing to itself returns true"]
       },
 
-      // ---------------- Day 3 (Binary Search Essentials - Questions 1 & 2) ----------------
+      // Day 3
       {
         id: 14,
         lcNumber: 704,
@@ -1425,7 +1401,7 @@ class Solution {
         day: 3,
         dayLabel: "Day 3: Binary Search Essentials",
         difficulty: "Easy",
-        pattern: "Binary Search / Half Discard",
+        pattern: "Binary Search Template",
         problemStatement: "Given an array of integers <code>nums</code> which is sorted in ascending order, and an integer <code>target</code>, write a function to search <code>target</code> in <code>nums</code>. If target exists, then return its index. Otherwise, return <code>-1</code>. You must write an algorithm with <code>O(log n)</code> runtime complexity.",
         examples: [
           { input: "nums = [-1,0,3,5,9,12], target = 9", output: "4", explanation: "9 exists in nums and its index is 4." },
@@ -1433,22 +1409,21 @@ class Solution {
         ],
         constraints: ["1 <= nums.length <= 10^4", "-10^4 < nums[i], target < 10^4", "All integers in nums are unique.", "nums is sorted in ascending order."],
         bottleneck: "A linear scan inspects every element in O(N), completely ignoring the sorted invariant.",
-        aha: "Because the array is sorted, checking `nums[mid]` tells us with certainty whether the target can exist in the left or right half. Discard half of the search space on every iteration.",
+        aha: "Because the array is sorted, checking nums[mid] tells us with certainty whether the target can exist in the left or right half. Discard half of the search space on every iteration.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">[-1, 0, 3, 5, 9, 12] | Target = 9</div>
-            <div class="p-2.5 bg-slate-950 rounded flex items-center justify-between text-[11px]">
-              <div>low=0, high=5 &rarr; mid=2 (val=3)</div>
-              <div class="text-amber-400">3 < 9 &rarr; Discard left half</div>
-              <div class="text-emerald-400 font-bold">low = mid + 1</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">[-1, 0, 3, 5, 9, 12] &bull; Target = 9</div>
+  <div class="p-2.5 bg-slate-900 rounded flex items-center justify-between text-[11px]">
+    <div>low=0, high=5 &rarr; mid=2 (val=3)</div>
+    <div class="text-amber-400">3 < 9 &rarr; Discard left half</div>
+    <div class="text-emerald-400 font-bold">low = mid + 1</div>
+  </div>
+</div>`,
         script: {
           clarify: "Are values unique? Yes. What should we return if target is missing? -1.",
           bruteForce: "For-loop from 0 to n-1 checking nums[i] == target. Time: O(N), Space: O(1).",
           bottleneck: "Linear search ignores sorted order, inspecting elements that cannot possibly equal the target.",
-          optimal: "Set `low = 0`, `high = n - 1`. While `low <= high`: `mid = low + (high - low) / 2`. If `nums[mid] == target` return mid. If `nums[mid] < target` `low = mid + 1`; else `high = mid - 1`. Return -1.",
+          optimal: "Set low = 0, high = n - 1. While low <= high: mid = low + (high - low) / 2. If nums[mid] == target return mid. If nums[mid] < target low = mid + 1; else high = mid - 1. Return -1.",
           dryRun: "nums=[-1,0,3,5,9,12], target=9: low=0, high=5 -> mid=2 (3). 3 < 9 -> low=3. mid=4 (9) == target -> return 4."
         },
         bruteForceCode: `class Solution {
@@ -1504,23 +1479,22 @@ class Solution {
         ],
         constraints: ["1 <= nums.length <= 5000", "-10^4 <= nums[i] <= 10^4", "All values of nums are unique.", "nums is an ascending array that was possibly rotated."],
         bottleneck: "Rotation disrupts monotonic sorted order, tempting a fallback to linear search O(N).",
-        aha: "Whenever you inspect `mid`, at least one of the two halves (left or right) is guaranteed to be normally sorted! If `nums[low] <= nums[mid]`, the left half is sorted. Check if target lies within that range; if so, narrow to it; otherwise search the right half.",
+        aha: "Whenever you inspect mid, at least one of the two halves (left or right) is guaranteed to be normally sorted! If nums[low] <= nums[mid], the left half is sorted. Check if target lies within that range; if so, narrow to it; otherwise search the right half.",
         diagram: `
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
-            <div class="text-slate-400 text-[11px] uppercase tracking-wide">nums = [4, 5, 6, 7, 0, 1, 2] | Target = 0</div>
-            <div class="p-3 bg-slate-950 rounded space-y-1 text-[11px]">
-              <div>low=0 (4), mid=3 (7), high=6 (2)</div>
-              <div class="text-indigo-300 font-bold">Left half [4..7] is sorted because 4 &le; 7.</div>
-              <div class="text-slate-400">Is 0 in [4..7]? NO &rarr; Target must be in right half!</div>
-              <div class="text-emerald-400 font-bold">low = mid + 1</div>
-            </div>
-          </div>
-        `,
+<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-xs">
+  <div class="text-slate-400 text-[11px] uppercase tracking-wider">nums = [4, 5, 6, 7, 0, 1, 2] &bull; Target = 0</div>
+  <div class="p-3 bg-slate-900 rounded space-y-1 text-[11px]">
+    <div>low=0 (4), mid=3 (7), high=6 (2)</div>
+    <div class="text-indigo-300 font-bold">Left half [4..7] is sorted because 4 &le; 7.</div>
+    <div class="text-slate-400">Is 0 in [4..7]? NO &rarr; Target must be in right half!</div>
+    <div class="text-emerald-400 font-bold">low = mid + 1</div>
+  </div>
+</div>`,
         script: {
           clarify: "Are all numbers unique? Yes. What is the required complexity? O(log N).",
           bruteForce: "Linear search across the entire array in O(N).",
           bottleneck: "Assuming the rotation completely destroys binary search. Rotation only splits the array into two sorted segments.",
-          optimal: "Check if `nums[low] <= nums[mid]`. If so, left is cleanly sorted: if target is between `nums[low]` and `nums[mid]`, set `high = mid - 1`; else `low = mid + 1`. Otherwise, right half must be cleanly sorted: if target is between `nums[mid]` and `nums[high]`, set `low = mid + 1`; else `high = mid - 1`.",
+          optimal: "Check if nums[low] <= nums[mid]. If so, left is cleanly sorted: if target is between nums[low] and nums[mid], set high = mid - 1; else low = mid + 1. Otherwise, right half must be cleanly sorted: if target is between nums[mid] and nums[high], set low = mid + 1; else high = mid - 1.",
           dryRun: "[4,5,6,7,0,1,2], target=0: mid=7. Left half [4..7] is sorted. 0 is not in [4..7], so search right (low=4). Next mid is 1. Right half [1..2] is sorted. 0 is < 1, search left (high=4). Mid=0 == target -> return 4."
         },
         bruteForceCode: `class Solution {
@@ -1573,7 +1547,7 @@ class Solution {
     ];
 
     // -------------------------------------------------------------
-    // STATE MANAGEMENT
+    // APPLICATION STATE
     // -------------------------------------------------------------
     let currentProblemId = 1;
     let currentDayFilter = 'all';
@@ -1581,24 +1555,26 @@ class Solution {
     let masteredProblems = new Set();
     let isDesktopSidebarCollapsed = false;
 
-    // Safely load mastered IDs from SafeStorage
+    // Load initial progress
     try {
       const stored = SafeStorage.getItem('dsa_sprint_mastered');
       if (stored) {
         masteredProblems = new Set(JSON.parse(stored));
       }
     } catch (e) {
-      console.warn('Failed parsing mastered storage:', e);
+      console.warn('Could not read mastered list:', e);
     }
 
-    // DOM References
+    // DOM Elements
     const problemListEl = document.getElementById('problemList');
     const problemDetailViewEl = document.getElementById('problemDetailView');
+    const mainScrollContainer = document.getElementById('mainScrollContainer');
     const masteredCountEl = document.getElementById('masteredCount');
     const masteredPercentEl = document.getElementById('masteredPercent');
-    const masteredFilterCountEl = document.getElementById('masteredFilterCount');
+    const masteredPillCountEl = document.getElementById('masteredPillCount');
     const globalProgressBarEl = document.getElementById('globalProgressBar');
     const searchInputEl = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
     const dayFilterBtns = document.querySelectorAll('.day-filter-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -1609,28 +1585,18 @@ class Solution {
     const cheatSheetDoneBtn = document.getElementById('cheatSheetDoneBtn');
     const cheatSheetModal = document.getElementById('cheatSheetModal');
     const resetProgressBtn = document.getElementById('resetProgressBtn');
-    const appHeader = document.getElementById('appHeader');
 
     // -------------------------------------------------------------
-    // INITIALIZATION & RESPONSIVE CALCS
+    // INITIALIZATION
     // -------------------------------------------------------------
-    function updateHeaderHeight() {
-      if (appHeader) {
-        const height = appHeader.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
-      }
-    }
-
     function init() {
-      updateHeaderHeight();
-      window.addEventListener('resize', updateHeaderHeight);
       renderProblemList();
       renderProblemDetail(currentProblemId);
       updateProgressUI();
       bindEvents();
     }
 
-    // Update Progress Indicators
+    // Update Progress Counters & Bar
     function updateProgressUI() {
       const total = PROBLEMS.length;
       const count = masteredProblems.size;
@@ -1638,7 +1604,7 @@ class Solution {
 
       masteredCountEl.textContent = `${count} / ${total}`;
       masteredPercentEl.textContent = `${pct}%`;
-      masteredFilterCountEl.textContent = count;
+      masteredPillCountEl.textContent = count;
       globalProgressBarEl.style.width = `${pct}%`;
 
       SafeStorage.setItem('dsa_sprint_mastered', JSON.stringify(Array.from(masteredProblems)));
@@ -1670,8 +1636,8 @@ class Solution {
 
       if (filtered.length === 0) {
         problemListEl.innerHTML = `
-          <div class="text-center py-8 text-slate-500 text-xs">
-            <i class="fa-solid fa-filter-circle-xmark text-lg mb-2 block"></i>
+          <div class="text-center py-10 text-slate-500 text-xs">
+            <i class="fa-solid fa-filter-circle-xmark text-xl mb-2 block"></i>
             <p>No questions match your filter.</p>
           </div>
         `;
@@ -1727,10 +1693,7 @@ class Solution {
             toggleMastered(p.id);
             return;
           }
-          currentProblemId = p.id;
-          renderProblemList();
-          renderProblemDetail(p.id);
-          // If on mobile/tablet drawer mode, close drawer automatically
+          navigateToProblem(p.id);
           if (window.innerWidth < 1024) {
             closeSidebar();
           }
@@ -1740,7 +1703,7 @@ class Solution {
       });
     }
 
-    // Render Detailed Problem View
+    // Render Detail View
     function renderProblemDetail(id) {
       const p = PROBLEMS.find(item => item.id === id);
       if (!p) return;
@@ -1802,7 +1765,7 @@ class Solution {
         </div>
 
         <!-- Problem Statement & Examples Card -->
-        <div class="bg-surface-card border border-surface-border rounded-2xl p-3.5 sm:p-5 space-y-3">
+        <div class="bg-surface-card border border-surface-border rounded-2xl p-4 sm:p-5 space-y-3 shadow-md">
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
             <i class="fa-solid fa-book-open text-indigo-400"></i>
             Problem Statement & Constraints
@@ -1812,7 +1775,7 @@ class Solution {
           <!-- Examples -->
           <div class="space-y-2 pt-1">
             ${p.examples.map((ex, idx) => `
-              <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono overflow-x-auto">
+              <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono overflow-x-auto">
                 <div class="text-slate-400"><strong class="text-slate-300">Example ${idx + 1}:</strong></div>
                 <div class="text-slate-300 mt-0.5">Input: <span class="text-amber-300">${escapeHtml(ex.input)}</span></div>
                 <div class="text-slate-300">Output: <span class="text-emerald-300 font-bold">${escapeHtml(ex.output)}</span></div>
@@ -1831,7 +1794,7 @@ class Solution {
         </div>
 
         <!-- The Aha! Derivation Card -->
-        <div class="bg-gradient-to-br from-[#0f172a] via-[#111c35] to-[#0f172a] border border-indigo-500/30 rounded-2xl p-3.5 sm:p-5 shadow-xl relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#0b1222] via-[#0f172a] to-[#0b1222] border border-indigo-500/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
           <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
             <span>The Derivation Bridge: From O(N²) to O(N)</span>
@@ -1858,24 +1821,24 @@ class Solution {
           </div>
         </div>
 
-        <!-- Visual Algorithm Diagram -->
-        <div class="bg-surface-card border border-surface-border rounded-2xl p-3.5 sm:p-5 space-y-2">
+        <!-- Visual Diagram -->
+        <div class="bg-surface-card border border-surface-border rounded-2xl p-4 sm:p-5 space-y-2 shadow-md">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <i class="fa-solid fa-diagram-project text-cyan-400"></i>
               Visual Diagram
             </h3>
-            <span class="text-[11px] text-slate-500">Memory & Pointer Traversal</span>
+            <span class="text-[11px] text-slate-500 font-mono">Mental Model</span>
           </div>
-          <div class="diagram-container pt-1">
+          <div class="overflow-x-auto pt-1">
             ${p.diagram}
           </div>
         </div>
 
         <!-- Tabbed Solutions & Verbal Script -->
         <div class="bg-surface-card border border-surface-border rounded-2xl overflow-hidden shadow-lg">
-          <!-- Tab Headers with smooth horizontal scroll -->
-          <div class="flex border-b border-surface-border bg-[#0b1120] px-3 sm:px-4 pt-2 gap-1 sm:gap-2 text-xs font-semibold overflow-x-auto no-scrollbar">
+          <!-- Tab Navigation -->
+          <div class="flex border-b border-surface-border bg-surface-sidebar px-3 sm:px-4 pt-2 gap-1 sm:gap-2 text-xs font-semibold overflow-x-auto no-scrollbar">
             <button class="detail-tab-btn active whitespace-nowrap px-3 sm:px-4 py-2.5 border-b-2 border-emerald-400 text-emerald-300 flex items-center gap-1.5 sm:gap-2" data-tab="optimalTab">
               <i class="fa-solid fa-rocket text-emerald-400"></i>
               <span>Optimized Java Solution</span>
@@ -1891,7 +1854,7 @@ class Solution {
           </div>
 
           <!-- TAB 1: OPTIMAL JAVA SOLUTION -->
-          <div id="optimalTab" class="tab-content p-3.5 sm:p-5 space-y-3.5 sm:space-y-4">
+          <div id="optimalTab" class="tab-content p-4 sm:p-5 space-y-3.5">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2 text-xs font-mono">
                 <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-400 border border-emerald-800 font-bold text-[11px] sm:text-xs">
@@ -1912,7 +1875,7 @@ class Solution {
             </div>
 
             <!-- Edge Cases Section -->
-            <div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-2">
+            <div class="p-3 sm:p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
               <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <i class="fa-solid fa-shield-halved text-indigo-400"></i>
                 Must-Mention Edge Cases & Pitfalls
@@ -1924,34 +1887,34 @@ class Solution {
           </div>
 
           <!-- TAB 2: INTERVIEW VERBAL SCRIPT -->
-          <div id="verbalScriptTab" class="tab-content hidden p-3.5 sm:p-5 space-y-3 text-xs leading-relaxed text-slate-300">
+          <div id="verbalScriptTab" class="tab-content hidden p-4 sm:p-5 space-y-3 text-xs leading-relaxed text-slate-300">
             <div class="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl text-indigo-200">
-              <i class="fa-solid fa-microphone mr-1 text-indigo-400"></i>
+              <i class="fa-solid fa-microphone mr-1.5 text-indigo-400"></i>
               <strong>Verbal Walkthrough:</strong> Speak this structured sequence to eliminate awkward pauses during your interview.
             </div>
 
             <div class="space-y-2.5">
-              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block mb-1">1. Clarify Assumptions</span>
                 <p class="text-slate-200 italic">"${p.script.clarify}"</p>
               </div>
 
-              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">2. State Brute Force</span>
                 <p class="text-slate-200 italic">"${p.script.bruteForce}"</p>
               </div>
 
-              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 block mb-1">3. Pinpoint Bottleneck</span>
                 <p class="text-slate-200 italic">"${p.script.bottleneck}"</p>
               </div>
 
-              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1">4. Propose Optimal Strategy</span>
                 <p class="text-slate-200 italic">"${p.script.optimal}"</p>
               </div>
 
-              <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 block mb-1">5. Manual Dry-Run Trace</span>
                 <p class="text-slate-200 italic">"${p.script.dryRun}"</p>
               </div>
@@ -1959,7 +1922,7 @@ class Solution {
           </div>
 
           <!-- TAB 3: BRUTE FORCE CODE -->
-          <div id="bruteForceTab" class="tab-content hidden p-3.5 sm:p-5 space-y-3.5 sm:space-y-4">
+          <div id="bruteForceTab" class="tab-content hidden p-4 sm:p-5 space-y-3.5">
             <div class="flex items-center justify-between">
               <div class="text-xs text-amber-400 font-medium">
                 <i class="fa-solid fa-triangle-exclamation mr-1"></i>
@@ -1975,6 +1938,27 @@ class Solution {
             </div>
           </div>
         </div>
+
+        <!-- Bottom Navigation Bar for Smooth Revision Flow -->
+        <div class="p-4 rounded-2xl bg-surface-card border border-surface-border flex items-center justify-between gap-2">
+          ${prevProblem ? `
+            <button class="bottom-nav-btn text-xs font-semibold px-3 py-2 rounded-xl bg-surface-cardHover hover:bg-slate-700 text-slate-200 flex items-center gap-1.5 transition" data-id="${prevProblem.id}">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span class="hidden sm:inline">Prev:</span> #${prevProblem.lcNumber} ${prevProblem.title}
+            </button>
+          ` : `<div class="text-xs text-slate-600">First Question</div>`}
+
+          <button id="bottomMasterBtn" class="text-xs font-bold px-3 py-2 rounded-xl transition ${isMastered ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/40' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}">
+            ${isMastered ? '<i class="fa-solid fa-circle-check mr-1"></i> Mastered' : '<i class="fa-regular fa-circle mr-1"></i> Mark Mastered'}
+          </button>
+
+          ${nextProblem ? `
+            <button class="bottom-nav-btn text-xs font-semibold px-3 py-2 rounded-xl bg-surface-cardHover hover:bg-slate-700 text-slate-200 flex items-center gap-1.5 transition" data-id="${nextProblem.id}">
+              <span class="hidden sm:inline">Next:</span> #${nextProblem.lcNumber} ${nextProblem.title}
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          ` : `<div class="text-xs text-slate-600">Last Question</div>`}
+        </div>
       `;
 
       // Syntax highlighting
@@ -1985,11 +1969,16 @@ class Solution {
       bindDetailEvents(p);
     }
 
-    // Detail view event handlers
+    // Detail Event Bindings
     function bindDetailEvents(p) {
       const detailMasterBtn = document.getElementById('detailMasterBtn');
       if (detailMasterBtn) {
         detailMasterBtn.addEventListener('click', () => toggleMastered(p.id));
+      }
+
+      const bottomMasterBtn = document.getElementById('bottomMasterBtn');
+      if (bottomMasterBtn) {
+        bottomMasterBtn.addEventListener('click', () => toggleMastered(p.id));
       }
 
       const currentIndex = PROBLEMS.findIndex(item => item.id === p.id);
@@ -2003,7 +1992,15 @@ class Solution {
         nextBtn.addEventListener('click', () => navigateToProblem(PROBLEMS[currentIndex + 1].id));
       }
 
-      // Tab switching
+      // Bottom nav buttons
+      document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = parseInt(btn.getAttribute('data-id'), 10);
+          navigateToProblem(targetId);
+        });
+      });
+
+      // Tab switcher
       const tabBtns = document.querySelectorAll('.detail-tab-btn');
       const tabContents = document.querySelectorAll('.tab-content');
 
@@ -2023,7 +2020,7 @@ class Solution {
         });
       });
 
-      // Safe clipboard copy button
+      // Code copy button
       const copyBtns = document.querySelectorAll('.copy-code-btn');
       copyBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2036,12 +2033,12 @@ class Solution {
       });
     }
 
-    // Navigate to problem
+    // Navigate to problem & scroll main container to top
     function navigateToProblem(id) {
       currentProblemId = id;
       renderProblemList();
       renderProblemDetail(id);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      mainScrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Toggle Mastered
@@ -2060,7 +2057,7 @@ class Solution {
       }
     }
 
-    // Safe clipboard copy for sandboxed iframes
+    // Copy Fallback for iframe & cross-origin safety
     function copyTextFallback(text) {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -2072,12 +2069,12 @@ class Solution {
       try {
         document.execCommand('copy');
       } catch (err) {
-        console.error('execCommand copy failed:', err);
+        console.error('Copy fallback failed:', err);
       }
       document.body.removeChild(textarea);
     }
 
-    // Toast Notifications
+    // Toast Alert
     function showToast(message) {
       const toastContainer = document.getElementById('toastContainer');
       const toast = document.createElement('div');
@@ -2092,7 +2089,7 @@ class Solution {
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
-      }, 2200);
+      }, 2000);
     }
 
     // HTML Escaper
@@ -2101,7 +2098,7 @@ class Solution {
       return String(string).replace(/[&<>"'/]/g, s => entityMap[s]);
     }
 
-    // Sidebar Toggles (handles both mobile slide-over drawer and laptop collapse)
+    // Sidebar Visibility
     function toggleSidebar() {
       if (window.innerWidth < 1024) {
         if (sidebar.classList.contains('-translate-x-full')) {
@@ -2132,18 +2129,27 @@ class Solution {
 
     // Bind Global Events
     function bindEvents() {
-      // Sidebar Toggle Button
+      // Toggle sidebar
       sidebarToggleBtn.addEventListener('click', toggleSidebar);
       if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
       sidebarOverlay.addEventListener('click', closeSidebar);
 
-      // Search Filter
+      // Search
       searchInputEl.addEventListener('input', (e) => {
         searchQuery = e.target.value;
+        clearSearchBtn.classList.toggle('hidden', searchQuery.length === 0);
         renderProblemList();
       });
 
-      // Filter Buttons
+      clearSearchBtn.addEventListener('click', () => {
+        searchInputEl.value = '';
+        searchQuery = '';
+        clearSearchBtn.classList.add('hidden');
+        renderProblemList();
+        searchInputEl.focus();
+      });
+
+      // Filter pills
       dayFilterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
           dayFilterBtns.forEach(b => {
@@ -2202,7 +2208,7 @@ class Solution {
       });
     }
 
-    // Launch App
+    // Launch
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
